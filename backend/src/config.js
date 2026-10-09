@@ -1,0 +1,2 @@
+export const site={"projectId": "shalandi-publications", "origin": "https://shalandi.kabitawithoutborders.org", "prefix": "/shalandi", "name": "Shalandi Publications", "uploadsEnabled": false};
+export const firebaseConfig={"projectId": "shalandi-publications", "appId": "1:694232777922:web:188b2207112ce83968e75b", "storageBucket": "shalandi-publications.firebasestorage.app", "apiKey": "AIzaSyA25yCPo6JoVtL0IOkcBQ0U1gutUpMfHWc", "authDomain": "shalandi-publications.firebaseapp.com", "messagingSenderId": "694232777922", "projectNumber": "694232777922", "version": "2"};

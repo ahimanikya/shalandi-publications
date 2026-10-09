@@ -1,0 +1,5 @@
+Shalandi Publications — separate website and repository.
+
+Public catalog, printed-book covers and reading material are preserved from the original combined source. Sishu Kishore is a separate external site. Firebase project: shalandi-publications. Public domain: shalandi.kabitawithoutborders.org.
+
+GitHub Actions publishes main to GitHub Pages. Backend source and rules live in backend/. No private submissions or server credentials belong in this repository.

@@ -1,0 +1,16 @@
+@font-face {
+  font-family: 'Noto Sans Oriya';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: normal;
+  font-display: swap;
+  src: url("/media/2594200ddd1e5fb89780c005.ttf") format('truetype');
+}
+@font-face {
+  font-family: 'Noto Sans Oriya';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: normal;
+  font-display: swap;
+  src: url("/media/4f7de603aa86d30504fa3117.ttf") format('truetype');
+}
