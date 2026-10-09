@@ -1,9 +1,10 @@
 import {readFileSync} from 'node:fs';
 import {test,before,after,beforeEach} from 'node:test';
 import {initializeTestEnvironment,assertFails,assertSucceeds} from '@firebase/rules-unit-testing';
+import {ref,uploadBytes,getBytes} from 'firebase/storage';
 import {doc,setDoc,getDoc,getDocs,collection,writeBatch,serverTimestamp,updateDoc} from 'firebase/firestore';
 let env;
-before(async()=>env=await initializeTestEnvironment({projectId:'demo-sishu-kishore',firestore:{rules:readFileSync('firestore.rules','utf8')}}));after(async()=>env?.cleanup());beforeEach(async()=>env.clearFirestore());
+before(async()=>env=await initializeTestEnvironment({projectId:'demo-shalandi-publications',firestore:{rules:readFileSync('firestore.rules','utf8')},storage:{rules:readFileSync('storage.rules','utf8')}}));after(async()=>env?.cleanup());beforeEach(async()=>env.clearFirestore());
 const db=(uid='writer',editor=false,verified=true)=>env.authenticatedContext(uid,{email:uid+'@example.test',email_verified:verified,editor}).firestore();
 const data=()=>({owner:'writer',name:'Writer',contact:'writer@example.test',kind:'article',title:'A story',body:'Private manuscript',page:'',status:'received',consent:'editorial-review-v1',createdAt:serverTimestamp(),updatedAt:serverTimestamp()});const id='abcdefghijklmnopqrst';
 async function submit(database,overrides={}){const b=writeBatch(database);b.set(doc(database,'submissions',id),{...data(),...overrides});b.set(doc(database,'submissionLimits','writer'),{id,at:serverTimestamp()});return b.commit();}
@@ -24,3 +25,7 @@ test('publication rejects contact leak',async()=>assertFails(setDoc(doc(db('edit
 test('drafts private',async()=>{const d={...pub(),sourceId:'',updatedAt:serverTimestamp()};delete d.state;delete d.publishedAt;await assertSucceeds(setDoc(doc(db('editor',true),'drafts',id),d));await assertFails(getDoc(doc(db(),'drafts',id)));await assertFails(getDoc(doc(env.unauthenticatedContext().firestore(),'drafts',id)));});
 test('unverified editor denied',async()=>assertFails(setDoc(doc(db('editor',true,false),'publications',id),pub())));
 test('unknown collections closed',async()=>assertFails(setDoc(doc(db('editor',true),'roles','attacker'),{editor:true})));
+
+test('attachment upload requires an existing owned submission',async()=>{const storage=env.authenticatedContext('writer',{email_verified:true}).storage();await assertFails(uploadBytes(ref(storage,'submissions/writer/missing/manuscript'),new Uint8Array([1]),{contentType:'text/plain'}));});
+test('attachment cannot be read by a stranger or anonymous visitor',async()=>{await env.withSecurityRulesDisabled(async ctx=>uploadBytes(ref(ctx.storage(),'submissions/writer/private/manuscript'),new Uint8Array([1]),{contentType:'text/plain'}));await assertFails(getBytes(ref(env.unauthenticatedContext().storage(),'submissions/writer/private/manuscript')));await assertFails(getBytes(ref(env.authenticatedContext('other',{email_verified:true}).storage(),'submissions/writer/private/manuscript')));});
+test('dangerous attachment type rejected',async()=>{await submit(db());const storage=env.authenticatedContext('writer',{email_verified:true}).storage();await assertFails(uploadBytes(ref(storage,`submissions/writer/${id}/manuscript`),new Uint8Array([1]),{contentType:'text/html'}));});
